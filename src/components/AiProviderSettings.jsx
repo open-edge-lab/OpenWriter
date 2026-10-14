@@ -3,19 +3,24 @@ import { Bot, CheckCircle2, RefreshCw } from 'lucide-react'
 import { reasoningByProvider } from '../lib/aiOptions.js'
 import ParameterSlider, { InfoTip } from './ParameterSlider.jsx'
 import ollamaLogo from '../assets/provider-logos/ollama.svg'
+import openRouterLogo from '../assets/provider-logos/openrouter.svg'
 import codexLogo from '../assets/provider-logos/codex.svg'
 import claudeCodeLogo from '../assets/provider-logos/claude-code.svg'
 import { t } from '../i18n/index.js'
+import ModelPicker from './ModelPicker.jsx'
 
 const ai = window.electronAPI?.ai
 
 const providers = [
   { value: 'ollama', label: 'Ollama', description: t('Local HTTP service') },
   { value: 'ollama-cloud', label: 'Ollama Cloud', description: t('Hosted API with an API key') },
+  { value: 'openrouter', label: 'OpenRouter', description: t('Hundreds of models with one API key') },
   { value: 'codex', label: 'Codex', description: t('Native CLI with ChatGPT OAuth') },
   { value: 'claude', label: 'Claude', description: t('Native CLI with Claude OAuth') },
 ]
-const logos = { ollama: ollamaLogo, 'ollama-cloud': ollamaLogo, codex: codexLogo, claude: claudeCodeLogo }
+const logos = { ollama: ollamaLogo, 'ollama-cloud': ollamaLogo, openrouter: openRouterLogo, codex: codexLogo, claude: claudeCodeLogo }
+// Provider che si usano con una chiave API salvata dall'app.
+const keyProviders = ['ollama-cloud', 'openrouter']
 const languages = ['Italiano', 'English', 'Español', 'Français', 'Deutsch', 'Português']
 const toolOptions = [
   { key: 'files', label: t('Project files'), help: t('List folders and read the project\'s files (the .ow folder is excluded).') },
@@ -35,22 +40,27 @@ export default function AiProviderSettings() {
   const [settings, setSettings] = useState(null)
   const [models, setModels] = useState([])
   const [modelsLoading, setModelsLoading] = useState(false)
+  // Cambia a ogni ricarica dei modelli, così il selettore rilegge anche cosa accettano.
+  const [modelsVersion, setModelsVersion] = useState(0)
   const [status, setStatus] = useState(null)
   const [apiKey, setApiKey] = useState('')
-  const [hasSavedKey, setHasSavedKey] = useState(false)
+  const [savedKeys, setSavedKeys] = useState({})
   const [capabilities, setCapabilities] = useState(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!ai) return
     ai.getSettings().then(setSettings)
-    ai.hasApiKey().then(setHasSavedKey)
+    Promise.all(keyProviders.map((name) => ai.hasApiKey(name)))
+      .then((values) => setSavedKeys(Object.fromEntries(keyProviders.map((name, index) => [name, Boolean(values[index])]))))
   }, [])
 
   const provider = settings?.provider
   const config = settings?.providers?.[provider] || {}
   const native = provider === 'codex' || provider === 'claude'
   const cloud = provider === 'ollama-cloud'
+  const openRouter = provider === 'openrouter'
+  const hasSavedKey = Boolean(savedKeys[provider])
 
   const persist = useCallback((next) => {
     setSettings(next)
@@ -64,6 +74,7 @@ export default function AiProviderSettings() {
     setError('')
     try {
       setModels(await ai.listModels({ provider, endpoint: config.endpoint, ...request }))
+      setModelsVersion((value) => value + 1)
     } catch (reason) {
       setModels([])
       setError(reason.message)
@@ -82,6 +93,7 @@ export default function AiProviderSettings() {
     if (!settings?.aiEnabled || !provider) return
     setModels([])
     setError('')
+    setApiKey('')
     if (native) refreshStatus()
     if (provider !== 'ollama-cloud' || hasSavedKey) loadModels()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,8 +107,8 @@ export default function AiProviderSettings() {
 
   async function saveKey() {
     try {
-      await ai.saveApiKey(apiKey)
-      setHasSavedKey(Boolean(apiKey.trim()))
+      await ai.saveApiKey(apiKey, provider)
+      setSavedKeys((current) => ({ ...current, [provider]: Boolean(apiKey.trim()) }))
       if (apiKey.trim()) await loadModels({ apiKey })
       setApiKey('')
     } catch (reason) {
@@ -145,7 +157,6 @@ export default function AiProviderSettings() {
   if (!settings) return null
 
   const connected = status?.provider === provider && status.authenticated
-  const modelOptions = [...new Set([config.model, ...models].filter(Boolean))]
 
   return (
     <section className="rounded-xl border border-slate-800 bg-slate-950/40 p-6">
@@ -222,12 +233,15 @@ export default function AiProviderSettings() {
             <p className="break-all text-xs text-slate-500">{t('Did the browser not open?')} <a href={loginInfo.url} target="_blank" rel="noreferrer" className="text-accent-400 underline">{t('Open the sign-in link')}</a></p>
           )}
 
-          {cloud && (
-            <label className="text-sm text-slate-300">{t('Ollama Cloud API key')} {hasSavedKey && <span className="text-emerald-400">{t('(saved)')}</span>}
+          {(cloud || openRouter) && (
+            <label className="text-sm text-slate-300">{cloud ? t('Ollama Cloud API key') : t('OpenRouter API key')} {hasSavedKey && <span className="text-emerald-400">{t('(saved)')}</span>}
               <div className="flex gap-2">
                 <input type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} className={fieldClass} placeholder={hasSavedKey ? '••••••••' : t('Paste the API key')} />
                 <button type="button" className={`${buttonClass} mt-2`} disabled={!apiKey.trim() && !hasSavedKey} onClick={saveKey}>{apiKey.trim() ? t('Save') : t('Remove')}</button>
               </div>
+              {openRouter && !hasSavedKey && (
+                <span className="mt-2 block text-xs text-slate-500">{t('You can create a key on')} <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-accent-400 underline">openrouter.ai/keys</a></span>
+              )}
             </label>
           )}
 
@@ -239,14 +253,20 @@ export default function AiProviderSettings() {
             </label>
           )}
 
-          <label className="text-sm text-slate-300">{t('Model')}<div className="flex gap-2">
-              <select className={fieldClass} value={config.model || ''} onChange={(event) => updateConfig({ model: event.target.value })}>
-                <option value="">{modelsLoading ? t('Loading…') : native ? t('Client default') : t('Select a model')}</option>
-                {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
-              </select>
+          <div className="text-sm text-slate-300">{t('Model')}<div className="flex gap-2">
+              <div className="min-w-0 flex-1">
+                <ModelPicker
+                  value={config.model || ''}
+                  models={models}
+                  emptyLabel={modelsLoading ? t('Loading…') : native ? t('Client default') : t('Select a model')}
+                  cacheKey={`${provider}|${config.endpoint || ''}|${modelsVersion}`}
+                  loadInputs={() => ai.listModelInputs({ provider, endpoint: config.endpoint })}
+                  onChange={(model) => updateConfig({ model })}
+                />
+              </div>
               <button type="button" aria-label={t('Refresh models')} title={t('Refresh models')} className={`${buttonClass} mt-2`} disabled={modelsLoading} onClick={() => loadModels()}><RefreshCw size={16} className={modelsLoading ? 'animate-spin' : ''} /></button>
             </div>
-          </label>
+          </div>
 
           <label className="text-sm text-slate-300">{t('Reply language')}<select className={fieldClass} value={settings.language} onChange={(event) => persist({ ...settings, language: event.target.value })}>
               <option value="">{t('Same as the interface')}</option>
@@ -259,13 +279,13 @@ export default function AiProviderSettings() {
             </select>
           </label>
 
-          {(provider === 'ollama' || provider === 'ollama-cloud') && (
+          {(provider === 'ollama' || cloud || openRouter) && (
             <details className="rounded-lg border border-slate-800 p-3 text-sm text-slate-300">
               <summary className="cursor-pointer select-none text-slate-300">{t('Advanced')}</summary>
               <p className="mt-2 text-xs text-slate-500">{t('Generation parameters sent with every request. Leave a field empty to use the model\'s default.')}</p>
               <div className="mt-3 grid gap-4">
-                <ParameterSlider id="ollama-num-ctx" label={t('Context window (num_ctx)')} help={t('How much text the model can keep in mind at once: your documents, the conversation and the instructions together. Larger values let the assistant read longer documents but use more memory and make replies slower. Typical values: 4096 to 32768.')} value={config.numCtx} onChange={(value) => updateConfig({ numCtx: value })} stops={[512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]} format={(value) => value.toLocaleString()} />
-                <ParameterSlider id="ollama-num-predict" label={t('Maximum reply tokens (num_predict)')} help={t('Upper limit on the length of a single reply, in tokens (about three quarters of a word each). Lower it to keep replies short and fast; if replies are cut off, raise it. Reasoning models count their thinking too.')} value={config.numPredict} onChange={(value) => updateConfig({ numPredict: value })} stops={[64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]} format={(value) => value.toLocaleString()} />
+                {!openRouter && <ParameterSlider id="ollama-num-ctx" label={t('Context window (num_ctx)')} help={t('How much text the model can keep in mind at once: your documents, the conversation and the instructions together. Larger values let the assistant read longer documents but use more memory and make replies slower. Typical values: 4096 to 32768.')} value={config.numCtx} onChange={(value) => updateConfig({ numCtx: value })} stops={[512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]} format={(value) => value.toLocaleString()} />}
+                <ParameterSlider id="ollama-num-predict" label={openRouter ? t('Maximum reply tokens (max_tokens)') : t('Maximum reply tokens (num_predict)')} help={t('Upper limit on the length of a single reply, in tokens (about three quarters of a word each). Lower it to keep replies short and fast; if replies are cut off, raise it. Reasoning models count their thinking too.')} value={config.numPredict} onChange={(value) => updateConfig({ numPredict: value })} stops={[64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]} format={(value) => value.toLocaleString()} />
                 <ParameterSlider id="ollama-temperature" label={t('Temperature')} help={t('How much freedom the model takes. Low values (0 to 0.3) give precise, repeatable replies, good for proofreading; high values (0.8 to 1.5) give more varied, creative wording. Above 1.5 the text may become incoherent.')} value={config.temperature} onChange={(value) => updateConfig({ temperature: value })} min={0} max={2} step={0.1} format={(value) => value.toFixed(1)} />
                 {provider === 'ollama' && (
                   <div className="relative block text-xs text-slate-400">
@@ -277,7 +297,7 @@ export default function AiProviderSettings() {
                   </div>
                 )}
               </div>
-              <p className="mt-2 text-xs text-slate-500">{t('A smaller context window and a lower token limit make replies faster; a larger window lets the assistant see more of the documents. Ollama Cloud may ignore some of these.')}</p>
+              {!openRouter && <p className="mt-2 text-xs text-slate-500">{t('A smaller context window and a lower token limit make replies faster; a larger window lets the assistant see more of the documents. Ollama Cloud may ignore some of these.')}</p>}
             </details>
           )}
 
