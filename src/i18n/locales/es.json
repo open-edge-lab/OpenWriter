@@ -1098,5 +1098,9 @@
   "Discuss with AI in a new chat": "Comentar con la IA en un chat nuevo",
   "Discuss with AI in the current chat": "Comentar con la IA en el chat actual",
   "Passages under discussion": "Fragmentos en discusión",
-  "Remove the passage": "Quitar el fragmento"
+  "Remove the passage": "Quitar el fragmento",
+  "Find synonyms with AI": "Buscar sinónimos con IA",
+  "Find antonyms with AI": "Buscar antónimos con IA",
+  "Suggest synonyms for the passage under discussion. For a word or a short expression, list several alternatives, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give alternatives for each, then a reworded version with the same meaning. Answer in the language of the passage and do not change the document unless I ask.": "Sugiere sinónimos para el fragmento en discusión. Para una palabra o una expresión breve, enumera varias alternativas, cada una con unas pocas palabras sobre su matiz y cuándo encaja; para un fragmento más largo, elige sus palabras clave y da alternativas para cada una, y luego una versión reformulada con el mismo significado. Responde en el idioma del fragmento y no modifiques el documento a menos que te lo pida.",
+  "Suggest antonyms (words with the opposite meaning) for the passage under discussion. For a word or a short expression, list several opposites, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give opposites for each, then a version with the opposite meaning. Answer in the language of the passage and do not change the document unless I ask.": "Sugiere antónimos (palabras de significado opuesto) para el fragmento en discusión. Para una palabra o una expresión breve, enumera varios antónimos, cada uno con unas pocas palabras sobre su matiz y cuándo encaja; para un fragmento más largo, elige sus palabras clave y da antónimos para cada una, y luego una versión con el significado opuesto. Responde en el idioma del fragmento y no modifiques el documento a menos que te lo pida."
 }

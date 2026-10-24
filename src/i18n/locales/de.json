@@ -1098,5 +1098,9 @@
   "Discuss with AI in a new chat": "Mit der KI in einem neuen Chat besprechen",
   "Discuss with AI in the current chat": "Mit der KI im aktuellen Chat besprechen",
   "Passages under discussion": "Besprochene Passagen",
-  "Remove the passage": "Passage entfernen"
+  "Remove the passage": "Passage entfernen",
+  "Find synonyms with AI": "Synonyme mit KI finden",
+  "Find antonyms with AI": "Gegenteile mit KI finden",
+  "Suggest synonyms for the passage under discussion. For a word or a short expression, list several alternatives, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give alternatives for each, then a reworded version with the same meaning. Answer in the language of the passage and do not change the document unless I ask.": "Schlage Synonyme für die besprochene Passage vor. Für ein Wort oder einen kurzen Ausdruck nenne mehrere Alternativen, jeweils mit ein paar Worten zu ihrer Nuance und wann sie passen; für eine längere Passage wähle die Schlüsselwörter, gib für jedes Alternativen an und dann eine umformulierte Fassung mit derselben Bedeutung. Antworte in der Sprache der Passage und ändere das Dokument nur, wenn ich darum bitte.",
+  "Suggest antonyms (words with the opposite meaning) for the passage under discussion. For a word or a short expression, list several opposites, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give opposites for each, then a version with the opposite meaning. Answer in the language of the passage and do not change the document unless I ask.": "Schlage Antonyme (Wörter mit gegenteiliger Bedeutung) für die besprochene Passage vor. Für ein Wort oder einen kurzen Ausdruck nenne mehrere Gegenteile, jeweils mit ein paar Worten zu ihrer Nuance und wann sie passen; für eine längere Passage wähle die Schlüsselwörter, gib für jedes Gegenteile an und dann eine Fassung mit gegenteiliger Bedeutung. Antworte in der Sprache der Passage und ändere das Dokument nur, wenn ich darum bitte."
 }

@@ -79,7 +79,7 @@ History can compare a version with the current text, restore it, or delete it. B
 
 ## AI Assistant
 
-The assistant is available in a side panel and can work on the current selection or the entire document. A selected passage can also be discussed on its own: the buttons of the selection bar, or the right-click menu, attach it to a new or the current conversation, and from then on the model receives the passage instead of the whole document.
+The assistant is available in a side panel and can work on the current selection or the entire document. A selected passage can also be discussed on its own: the buttons of the selection bar, or the right-click menu, attach it to a new or the current conversation, and from then on the model receives the passage instead of the whole document. Two more buttons ask straight away, in a new chat, for synonyms or antonyms of the selection.
 
 Quick actions (proofread, rewrite, summarize, lengthen, review) can be edited in Settings, and you can add your own; by default Review leaves its remarks as notes in the document. Conversations are saved in the project and can be renamed, deleted, or branched.
 

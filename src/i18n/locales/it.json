@@ -1098,5 +1098,9 @@
   "Discuss with AI in a new chat": "Discuti con l'AI in una nuova chat",
   "Discuss with AI in the current chat": "Discuti con l'AI nella chat corrente",
   "Passages under discussion": "Brani in discussione",
-  "Remove the passage": "Rimuovi il brano"
+  "Remove the passage": "Rimuovi il brano",
+  "Find synonyms with AI": "Trova sinonimi con l'AI",
+  "Find antonyms with AI": "Trova contrari con l'AI",
+  "Suggest synonyms for the passage under discussion. For a word or a short expression, list several alternatives, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give alternatives for each, then a reworded version with the same meaning. Answer in the language of the passage and do not change the document unless I ask.": "Suggerisci dei sinonimi per il brano in discussione. Per una parola o una breve espressione, elenca diverse alternative, ciascuna con poche parole sulla sua sfumatura e su quando si adatta; per un brano più lungo, scegli le parole chiave e dai delle alternative per ciascuna, poi una versione riformulata con lo stesso significato. Rispondi nella lingua del brano e non modificare il documento se non te lo chiedo.",
+  "Suggest antonyms (words with the opposite meaning) for the passage under discussion. For a word or a short expression, list several opposites, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give opposites for each, then a version with the opposite meaning. Answer in the language of the passage and do not change the document unless I ask.": "Suggerisci dei contrari (parole di significato opposto) per il brano in discussione. Per una parola o una breve espressione, elenca diversi contrari, ciascuno con poche parole sulla sua sfumatura e su quando si adatta; per un brano più lungo, scegli le parole chiave e dai dei contrari per ciascuna, poi una versione di significato opposto. Rispondi nella lingua del brano e non modificare il documento se non te lo chiedo."
 }

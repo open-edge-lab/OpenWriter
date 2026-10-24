@@ -76,6 +76,11 @@ const isDocument = (tab) => tab && tab.kind !== 'browser' && tab.kind !== 'image
 // Una scheda fissata chiusa resta al suo posto senza documento caricato (con il pulsante "Apri"): non ha editor.
 const isLive = (tab) => isDocument(tab) && !tab.closed
 const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms) })
+// Domande già pronte su un brano selezionato (barra della selezione, clic destro): partono con il brano in una chat nuova.
+const PASSAGE_QUESTIONS = {
+  synonyms: 'Suggest synonyms for the passage under discussion. For a word or a short expression, list several alternatives, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give alternatives for each, then a reworded version with the same meaning. Answer in the language of the passage and do not change the document unless I ask.',
+  antonyms: 'Suggest antonyms (words with the opposite meaning) for the passage under discussion. For a word or a short expression, list several opposites, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give opposites for each, then a version with the opposite meaning. Answer in the language of the passage and do not change the document unless I ask.',
+}
 // Percorso assoluto (Windows, di rete o POSIX): l'assistente lo usa per i documenti aperti fuori dal progetto.
 const isAbsolutePath = (value) => /^([A-Za-z]:[\\/]|\\\\|\/)/.test(String(value || ''))
 
@@ -306,6 +311,8 @@ export default function App() {
             { separator: true },
             { label: t('Discuss with AI in a new chat'), onClick: () => discussPassage(passage, { newChat: true }) },
             { label: t('Discuss with AI in the current chat'), onClick: () => discussPassage(passage, { newChat: false }) },
+            { label: t('Find synonyms with AI'), onClick: () => discussPassage(passage, { ask: 'synonyms' }) },
+            { label: t('Find antonyms with AI'), onClick: () => discussPassage(passage, { ask: 'antonyms' }) },
           )
         }
       }
@@ -965,9 +972,10 @@ export default function App() {
   }, [])
 
   // Brano selezionato da discutere con l'assistente: entra nel contesto della chat (nuova o aperta) senza partire, la domanda la scrive l'utente.
-  const discussPassage = useCallback((passage, { newChat }) => {
+  // Con `ask` (sinonimi, contrari) la domanda è già pronta e parte subito, in una chat nuova.
+  const discussPassage = useCallback((passage, { newChat, ask }) => {
     setAssistantOpen(true)
-    setChatRequest({ id: Date.now(), passage, newChat })
+    setChatRequest({ id: Date.now(), passage, newChat: ask ? true : newChat, ...(ask ? { text: t(PASSAGE_QUESTIONS[ask]) } : {}) })
   }, [])
 
   useDocumentFileCommands({ activeTab, getEditor, workspace, onStatusChange: setStatus })

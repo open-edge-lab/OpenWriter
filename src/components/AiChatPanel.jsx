@@ -75,6 +75,13 @@ function userAttachmentParts(message, loaded) {
 // Titoli lunghi: nelle liste a discesa si abbreviano, il titolo completo resta nel tooltip.
 const ellipsize = (value, limit) => (value.length > limit ? `${value.slice(0, limit - 1).trimEnd()}…` : value)
 const blankConversation = () => ({ id: null, title: '', parentId: null, branchedAt: null, contextFrom: [], skillOverrides: { add: [], remove: [] }, passages: [], messages: [] })
+// Conversazione con un brano in più in discussione (la stessa, se c'è già); una conversazione ancora vuota prende il brano come titolo.
+function withPassage(conversation, passage) {
+  const passages = conversation.passages || []
+  if (passages.some((item) => item.text === passage.text && item.filePath === passage.filePath)) return conversation
+  const untitled = !conversation.title && !conversation.messages.length
+  return { ...conversation, passages: [...passages, passage], ...(untitled ? { title: `“${ellipsize(passage.text.replace(/\s+/g, ' '), 50)}”` } : {}) }
+}
 const noSkills = { skills: [], defaults: [], problems: [], chain: [] }
 // Skill attive in una conversazione, come oggetti completi (istruzioni, esempi, azioni), nell'ordine di attivazione.
 const activeSkillsOf = (data, overrides) => {
@@ -789,17 +796,14 @@ export default function AiChatPanel({ editor, contextTab, openDocuments = [], co
     handledRequest.current = request.id
     // Consumata: altrimenti, rimontando il pannello (es. dopo le impostazioni), la stessa richiesta ripartirebbe da sola.
     onRequestHandled?.()
-    // Brano da discutere: entra nel contesto della conversazione e non parte nulla; la domanda la scrive l'utente.
-    if (request.passage) {
-      const passages = current.passages || []
-      if (!passages.some((item) => item.text === request.passage.text && item.filePath === request.passage.filePath)) {
-        const untitled = !current.title && !current.messages.length
-        updateConversation({ passages: [...passages, request.passage], ...(untitled ? { title: `“${ellipsize(request.passage.text.replace(/\s+/g, ' '), 50)}”` } : {}) })
-      }
+    // Brano da discutere: entra nel contesto della conversazione; senza una domanda già pronta (sinonimi, contrari) non parte nulla e la scrive l'utente.
+    if (request.passage && !request.text) {
+      const next = withPassage(current, request.passage)
+      if (next !== current) updateConversation(next)
       composer.current?.focus()
       return
     }
-    send(request.text || '', request.attachment, request.resume ? { resume: true } : {})
+    send(request.text || '', request.attachment, { ...(request.resume ? { resume: true } : {}), ...(request.passage ? { passage: request.passage } : {}) })
   })
 
   // Riprende da dove si era interrotto: l'ultimo messaggio è dell'utente (o un errore dell'assistente, che viene scartato).
@@ -848,7 +852,7 @@ export default function AiChatPanel({ editor, contextTab, openDocuments = [], co
     }
   }
 
-  async function runConversation(content, attachment, { resume = false }) {
+  async function runConversation(content, attachment, { resume = false, passage = null }) {
     setError('')
     composer.current?.setValue('')
     runRef.current = { cancelled: false, cancel: null }
@@ -868,11 +872,13 @@ export default function AiChatPanel({ editor, contextTab, openDocuments = [], co
     const stored = await storeUserAttachments(outgoing)
     const images = [...(edited?.images || []), ...stored.images]
     const files = [...(edited?.files || []), ...stored.files]
+    // Il brano che accompagna una domanda già pronta entra nella conversazione insieme al messaggio.
+    const start = passage ? withPassage(current, passage) : current
     let conversation = resume
-      ? { ...current, messages: base }
+      ? { ...start, messages: base }
       : {
-        ...current,
-        title: current.title || content.slice(0, 60) || outgoing[0]?.label || '',
+        ...start,
+        title: start.title || content.slice(0, 60) || outgoing[0]?.label || '',
         messages: [...base, { role: 'user', content, ...(kept ? { attachment: kept } : {}), ...(images.length ? { images } : {}), ...(files.length ? { files } : {}), at: new Date().toISOString() }],
       }
     setCurrent(conversation)

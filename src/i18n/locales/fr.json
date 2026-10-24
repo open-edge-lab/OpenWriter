@@ -1098,5 +1098,9 @@
   "Discuss with AI in a new chat": "En discuter avec l'IA dans une nouvelle conversation",
   "Discuss with AI in the current chat": "En discuter avec l'IA dans la conversation actuelle",
   "Passages under discussion": "Passages en discussion",
-  "Remove the passage": "Retirer le passage"
+  "Remove the passage": "Retirer le passage",
+  "Find synonyms with AI": "Trouver des synonymes avec l'IA",
+  "Find antonyms with AI": "Trouver des antonymes avec l'IA",
+  "Suggest synonyms for the passage under discussion. For a word or a short expression, list several alternatives, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give alternatives for each, then a reworded version with the same meaning. Answer in the language of the passage and do not change the document unless I ask.": "Propose des synonymes pour le passage en discussion. Pour un mot ou une courte expression, donne plusieurs alternatives, chacune avec quelques mots sur sa nuance et sur le moment où elle convient ; pour un passage plus long, choisis ses mots clés et donne des alternatives pour chacun, puis une version reformulée de même sens. Réponds dans la langue du passage et ne modifie pas le document sauf si je le demande.",
+  "Suggest antonyms (words with the opposite meaning) for the passage under discussion. For a word or a short expression, list several opposites, each with a few words on its nuance and when it fits; for a longer passage, pick its key words and give opposites for each, then a version with the opposite meaning. Answer in the language of the passage and do not change the document unless I ask.": "Propose des antonymes (mots de sens contraire) pour le passage en discussion. Pour un mot ou une courte expression, donne plusieurs contraires, chacun avec quelques mots sur sa nuance et sur le moment où il convient ; pour un passage plus long, choisis ses mots clés et donne des contraires pour chacun, puis une version de sens opposé. Réponds dans la langue du passage et ne modifie pas le document sauf si je le demande."
 }

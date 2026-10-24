@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getMarkRange } from '@tiptap/core'
 import { useEditorState } from '@tiptap/react'
-import { Asterisk, Bold, Check, Code, ExternalLink, Image as ImageIcon, Italic, Link as LinkIcon, MessageSquarePlus, MessageSquareText, Pencil, Strikethrough, Trash2, Unlink, X } from 'lucide-react'
+import { Asterisk, Bold, Check, Code, Equal, EqualNot, ExternalLink, Image as ImageIcon, Italic, Link as LinkIcon, MessageSquarePlus, MessageSquareText, Pencil, Strikethrough, Trash2, Unlink, X } from 'lucide-react'
 import FloatingToolbar, { FloatingButton, FloatingDivider } from './FloatingToolbar.jsx'
 import { resolveDocumentLink } from '../lib/imagePaths.js'
 import { selectedText } from '../lib/selectionText.js'
@@ -62,8 +62,8 @@ function useSettledSelection(editor) {
  * Barra fluttuante della selezione: appare quando la selezione si ferma. Con del testo selezionato offre grassetto, corsivo, barrato e codice
  * e il collegamento; dentro un collegamento mostra dove punta (modifica, apri, togli). Ctrl+K, o il pulsante della barra del documento
  * (`request` cambia a ogni richiesta), apre la modifica del collegamento anche a cursore vuoto, per inserirne uno nuovo.
- * `onDiscuss(text, { newChat })`, se c'è (assistente attivo), aggiunge i pulsanti per discutere il testo selezionato con l'assistente,
- * in una chat nuova o in quella aperta.
+ * `onDiscuss(text, { newChat, ask })`, se c'è (assistente attivo), aggiunge i pulsanti per discutere il testo selezionato con l'assistente,
+ * in una chat nuova o in quella aperta, e per chiedergli subito sinonimi o contrari (`ask`: 'synonyms' | 'antonyms').
  */
 export default function SelectionToolbar({ editor, containerRef, request, documentPath, onOpenLink, onReplaceImage, onDiscuss }) {
   const state = useEditorState({
@@ -282,15 +282,17 @@ export default function SelectionToolbar({ editor, containerRef, request, docume
         </>
       )
       : <FloatingButton label={t('Add link (Ctrl+K)')} onClick={startEdit}><LinkIcon size={14} /></FloatingButton>
-    const discuss = (newChat) => {
+    const discuss = (options) => {
       const text = selectedText(editor).trim()
-      if (text) onDiscuss(text, { newChat })
+      if (text) onDiscuss(text, options)
     }
     const ai = onDiscuss && !state.empty && (
       <>
         <FloatingDivider />
-        <FloatingButton label={t('Discuss with AI in a new chat')} onClick={() => discuss(true)}><MessageSquarePlus size={14} /></FloatingButton>
-        <FloatingButton label={t('Discuss with AI in the current chat')} onClick={() => discuss(false)}><MessageSquareText size={14} /></FloatingButton>
+        <FloatingButton label={t('Discuss with AI in a new chat')} onClick={() => discuss({ newChat: true })}><MessageSquarePlus size={14} /></FloatingButton>
+        <FloatingButton label={t('Discuss with AI in the current chat')} onClick={() => discuss({ newChat: false })}><MessageSquareText size={14} /></FloatingButton>
+        <FloatingButton label={t('Find synonyms with AI')} onClick={() => discuss({ ask: 'synonyms' })}><Equal size={14} /></FloatingButton>
+        <FloatingButton label={t('Find antonyms with AI')} onClick={() => discuss({ ask: 'antonyms' })}><EqualNot size={14} /></FloatingButton>
       </>
     )
     content = <>{formatting}{link}{ai}</>
